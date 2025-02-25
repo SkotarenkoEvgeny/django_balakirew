@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 
-from women.forms import AddPostForm
+from women.forms import AddPostForm, UploadFileForm
 from women.models import Category, Women, TagPost
 
 menu = [{'title': "О сайте", 'url_name': 'about'},
@@ -21,9 +21,21 @@ def index(request):
     return render(request, 'women/index.html', context=data)
 
 
+def handle_uploaded_file(file):
+    with open(f"uploads/{file.name}", 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+
+
 def about(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(form.cleaned_data['file'])
+    else:
+        form = UploadFileForm()
     return render(request, 'women/about.html',
-                  context={'title': 'О сайте', 'menu': menu})
+                  context={'title': 'О сайте', 'menu': menu, 'form': form})
 
 
 def show_post(request, post_slug):
@@ -37,12 +49,8 @@ def add_page(request):
     if request.method == 'POST':
         form = AddPostForm(request.POST or None)
         if form.is_valid():
-            try:
-                Women.objects.create(**form.cleaned_data)
-                return redirect('home')
-            except:
-                form.add_error(None, "Ошибка добавления поста")
-
+            form.save()
+            return redirect('home')
     else:
         form = AddPostForm()
     data = {'title': 'Добавление статьи', 'meny': menu, 'form': form}
