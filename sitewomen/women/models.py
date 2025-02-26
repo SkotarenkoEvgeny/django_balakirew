@@ -14,6 +14,8 @@ class Women(models.Model):
 
     title = models.CharField(max_length=150, verbose_name='Заголовок')
     slug = models.SlugField(max_length=255, unique=True, db_index=True)
+    photo = models.ImageField(upload_to="photos/%Y/%m/%d/", null=True, blank=True,default=None,
+                              verbose_name="Фото")
     content = models.TextField(blank=True, verbose_name='Текст статьи')
     time_create = models.DateTimeField(auto_now_add=True)
     time_update = models.DateTimeField(auto_now=True)
@@ -79,3 +81,7 @@ class Husband(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UploadFile(models.Model):
+    file = models.FileField(upload_to='uploads/')

@@ -27,7 +27,7 @@ class AddPostForm(forms.ModelForm):
                                      required=False, label='Муж')
     class Meta:
        model = Women
-       fields = ['title', 'slug', 'content', 'is_published', 'cat', 'husband', 'tags']
+       fields = ['title', 'slug', 'photo', 'content', 'is_published', 'cat', 'husband', 'tags']
        widgets = {
            'title': forms.TextInput(attrs={'class': 'form-input'}),
            'content': forms.Textarea(attrs={'cols': 60, 'rows': 10}),

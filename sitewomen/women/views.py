@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 
 from women.forms import AddPostForm, UploadFileForm
-from women.models import Category, Women, TagPost
+from women.models import Category, Women, TagPost, UploadFile
 
 menu = [{'title': "О сайте", 'url_name': 'about'},
         {'title': "Добавить статью", 'url_name': 'add_page'},
@@ -21,17 +21,18 @@ def index(request):
     return render(request, 'women/index.html', context=data)
 
 
-def handle_uploaded_file(file):
-    with open(f"uploads/{file.name}", 'wb+') as destination:
-        for chunk in file.chunks():
-            destination.write(chunk)
+# def handle_uploaded_file(file):
+#     with open(f"uploads/{file.name}", 'wb+') as destination:
+#         for chunk in file.chunks():
+#             destination.write(chunk)
 
 
 def about(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(form.cleaned_data['file'])
+            fp = UploadFile(file=form.cleaned_data['file'])
+            fp.save()
     else:
         form = UploadFileForm()
     return render(request, 'women/about.html',
@@ -47,7 +48,7 @@ def show_post(request, post_slug):
 
 def add_page(request):
     if request.method == 'POST':
-        form = AddPostForm(request.POST or None)
+        form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('home')
