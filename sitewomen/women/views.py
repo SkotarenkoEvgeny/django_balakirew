@@ -1,5 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
+from django.views import View
+from django.views.generic import TemplateView
 
 from women.forms import AddPostForm, UploadFileForm
 from women.models import Category, Women, TagPost, UploadFile
@@ -10,15 +12,22 @@ menu = [{'title': "О сайте", 'url_name': 'about'},
         {'title': "Войти", 'url_name': 'login'}]
 
 
-def index(request):
-    posts = Women.published.all().select_related('cat')
-    data = {
+class WomenHome(TemplateView):
+    template_name = 'women/index.html'
+    extra_context = {
         'title': 'Главная страница',
         'menu': menu,
-        'posts': posts,
+        'posts': Women.published.all().select_related('cat'),
         'cat_selected': 0,
         }
-    return render(request, 'women/index.html', context=data)
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(WomenHome, self).get_context_data(**kwargs)
+    #     context['menu'] = menu
+    #     context['title'] = 'Главная страница'
+    #     context['posts'] = Women.published.all().select_related('cat')
+    #     context['cat_selected'] = int(self.request.GET.get('cat_id', 0))
+    #     return context
 
 
 # def handle_uploaded_file(file):
@@ -46,16 +55,20 @@ def show_post(request, post_slug):
     return render(request, 'women/post.html', context=data)
 
 
-def add_page(request):
-    if request.method == 'POST':
+class AddPage(View):
+
+    def get(self, request):
+        form = AddPostForm()
+        data = {'title': 'Добавление статьи', 'meny': menu, 'form': form}
+        return render(request, 'women/add_page.html', context=data)
+
+    def post(self, request):
         form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('home')
-    else:
-        form = AddPostForm()
-    data = {'title': 'Добавление статьи', 'meny': menu, 'form': form}
-    return render(request, 'women/add_page.html', context=data)
+        data = {'title': 'Добавление статьи', 'meny': menu, 'form': form}
+        return render(request, 'women/add_page.html', context=data)
 
 
 def contact(request):
