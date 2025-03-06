@@ -2,8 +2,9 @@ from tkinter import Listbox
 
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, FormView
 
 from women.forms import AddPostForm, UploadFileForm
 from women.models import Category, Women, TagPost, UploadFile
@@ -57,20 +58,15 @@ class ShowPost(DetailView):
         return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwarg])
 
 
-class AddPage(View):
+class AddPage(FormView):
+    form_class = AddPostForm
+    template_name = 'women/add_page.html'
+    success_url = reverse_lazy('home')
+    extra_context = {'title': 'Добавление статьи', 'meny': menu}
 
-    def get(self, request):
-        form = AddPostForm()
-        data = {'title': 'Добавление статьи', 'meny': menu, 'form': form}
-        return render(request, 'women/add_page.html', context=data)
-
-    def post(self, request):
-        form = AddPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-        data = {'title': 'Добавление статьи', 'meny': menu, 'form': form}
-        return render(request, 'women/add_page.html', context=data)
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 
 
 def contact(request):
