@@ -24,4 +24,8 @@
 {{post.content|linebreaks}}
 <div class="clear"></div>
 <p class="link-read-post"><a href="{% url 'home' %}">home</a></p>
+    <div class="clear"></div>
+<p class="link-read-post"><a href="{% url 'edit_page' post.slug %}">edit page</a></p>
+<div class="clear"></div>
+<p class="link-read-post"><a href="{% url 'delete_page' post.slug %}">delete page</a></p>
 {% endblock %}
