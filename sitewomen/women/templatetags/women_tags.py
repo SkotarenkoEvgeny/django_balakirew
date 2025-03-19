@@ -1,10 +1,15 @@
 from django import template
 
 from women.models import Category, TagPost
+from women.utils import menu
 
 
 register = template.Library()
 
+
+@register.simple_tag
+def get_menu():
+    return menu
 
 @register.simple_tag(name='getcats')
 def get_categories():
