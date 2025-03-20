@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 
@@ -37,6 +38,8 @@ class Women(models.Model):
         "Husband", on_delete=models.SET_NULL, null=True,
         related_name='wuman', blank=True
         )
+    author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, related_name='posts', null=True,
+                               default=None)
 
     objects = models.Manager()
     published = PublishedManager()
