@@ -20,12 +20,21 @@ from django.urls import path, include
 
 from sitewomen import settings
 from women import views
+from women.site_maps import PostSitemap
 from women.views import page_not_found
+
+from django.contrib.sitemaps.views import sitemap
+
+
+sitemaps = {"posts": PostSitemap}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('women.urls')),
     path('users/', include('users.urls', namespace='users')),
+    path('social-auth/', include('social_django.urls', namespace='social')),
+    path('captcha/', include('captcha.urls')),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     ]
 
 if settings.DEBUG:

@@ -1,11 +1,11 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 
-from women.forms import UploadFileForm
+from women.forms import UploadFileForm, ContactForm
 from women.models import Women, TagPost, UploadFile
 from women.utils import DataMixin
 
@@ -46,11 +46,12 @@ class ShowPost(DataMixin, DetailView):
         return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwarg])
 
 
-class AddPage(LoginRequiredMixin, DataMixin, CreateView):
+class AddPage(PermissionRequiredMixin, LoginRequiredMixin, DataMixin, CreateView):
     model = Women
     template_name = 'women/add_page.html'
     fields = '__all__'
     title_page = 'Добавление статьи'
+    permission_required = 'women.add_women'
 
     def form_valid(self, form):
         w = form.save(commit=False)
@@ -59,11 +60,12 @@ class AddPage(LoginRequiredMixin, DataMixin, CreateView):
 
 
 
-class UpdatePage(DataMixin, UpdateView):
+class UpdatePage(PermissionRequiredMixin, DataMixin, UpdateView):
     model = Women
     template_name = 'women/add_page.html'
     title_page = 'Редактирование статьи'
     fields = ['title', 'content', 'photo', 'is_published', 'cat']
+    permission_required = 'women.change_women'
 
 
 class DeletePage(DataMixin, DeleteView):
@@ -74,9 +76,15 @@ class DeletePage(DataMixin, DeleteView):
     title_page = 'Удаление статьи'
 
 
-def contact(request):
-    return HttpResponse("Обратная связь")
+class ContactFormView(LoginRequiredMixin, DataMixin, FormView):
+    template_name = 'women/contact_form.html'
+    form_class = ContactForm
+    success_url = reverse_lazy("home")
+    title_page = "Обратная связь"
 
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return super().form_valid(form)
 
 def login(request):
     return HttpResponse("Авторизация")

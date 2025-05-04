@@ -1,0 +1,26 @@
+ {% extends "base.html" %}
+
+ {% block content %}
+ <h1>{{ title }}</h1>
+
+
+<form ... method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit">Отправить</button>
+        <button class="js-captcha-refresh" type="button">Refresh captcha</button>
+    </form>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+$('.js-captcha-refresh').click(function(){
+    $form = $(this).parents('form');
+    $.getJSON("/captcha/refresh/", function (result) {
+        $('.captcha').attr('src', result['image_url']);
+        $('#id_captcha_0').val(result['key'])
+    });
+    return false;
+});
+</script>
+ {% endblock %}
